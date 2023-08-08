@@ -1,4 +1,3 @@
-#import <AppKit/AppKit.h>
 #import "MASShortcutView.h"
 
 /**
@@ -18,9 +17,9 @@
 */
 @interface MASShortcutView (Bindings)
 
-@property(copy, nullable) NSString *associatedUserDefaultsKey;
+@property(copy) NSString *associatedUserDefaultsKey;
 
-- (void) setAssociatedUserDefaultsKey: (nullable NSString*) newKey withTransformer: (nullable NSValueTransformer*) transformer;
-- (void) setAssociatedUserDefaultsKey: (nullable NSString*) newKey withTransformerName: (nullable NSString*) transformerName;
+- (void) setAssociatedUserDefaultsKey: (NSString*) newKey withTransformer: (NSValueTransformer*) transformer;
+- (void) setAssociatedUserDefaultsKey: (NSString*) newKey withTransformerName: (NSString*) transformerName;
 
 @end

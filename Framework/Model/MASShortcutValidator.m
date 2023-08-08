@@ -52,23 +52,19 @@
 
 - (BOOL) isShortcut: (MASShortcut*) shortcut alreadyTakenInMenu: (NSMenu*) menu explanation: (NSString**) explanation
 {
-    if (self.allowOverridingServicesShortcut && menu == [NSApp servicesMenu]) {
-        return NO;
-    }
-
     NSString *keyEquivalent = [shortcut keyCodeStringForKeyEquivalent];
     NSEventModifierFlags flags = [shortcut modifierFlags];
 
     for (NSMenuItem *menuItem in menu.itemArray) {
         if (menuItem.hasSubmenu && [self isShortcut:shortcut alreadyTakenInMenu:[menuItem submenu] explanation:explanation]) return YES;
         
-        BOOL equalFlags = (MASPickModifiersIncludingFn(menuItem.keyEquivalentModifierMask) == flags);
+        BOOL equalFlags = (MASPickCocoaModifiers(menuItem.keyEquivalentModifierMask) == flags);
         BOOL equalHotkeyLowercase = [menuItem.keyEquivalent.lowercaseString isEqualToString:keyEquivalent];
         
         // Check if the cases are different, we know ours is lower and that shift is included in our modifiers
         // If theirs is capitol, we need to add shift to their modifiers
         if (equalHotkeyLowercase && ![menuItem.keyEquivalent isEqualToString:keyEquivalent]) {
-            equalFlags = (MASPickModifiersIncludingFn(menuItem.keyEquivalentModifierMask | NSEventModifierFlagShift) == flags);
+            equalFlags = (MASPickCocoaModifiers(menuItem.keyEquivalentModifierMask | NSEventModifierFlagShift) == flags);
         }
         
         if (equalFlags && equalHotkeyLowercase) {

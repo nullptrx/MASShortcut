@@ -1,4 +1,4 @@
-#import <AppKit/AppKit.h>
+#import "MASKeyMasks.h"
 #import "MASShortcut.h"
 #import "MASShortcutValidator.h"
 #import "MASShortcutMonitor.h"
@@ -6,4 +6,3 @@
 #import "MASDictionaryTransformer.h"
 #import "MASShortcutView.h"
 #import "MASShortcutView+Bindings.h"
-#import "MASShortcutViewButtonCell.h"

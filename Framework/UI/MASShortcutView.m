@@ -1,7 +1,6 @@
 #import "MASShortcutView.h"
 #import "MASShortcutValidator.h"
 #import "MASLocalization.h"
-#import "MASShortcutViewButtonCell.h"
 
 NSString *const MASShortcutBinding = @"shortcutValue";
 
@@ -21,7 +20,7 @@ static const CGFloat MASButtonFontSize = 11;
 #pragma mark -
 
 @implementation MASShortcutView {
-    MASShortcutViewButtonCell *_shortcutCell;
+    NSButtonCell *_shortcutCell;
     NSInteger _shortcutToolTipTag;
     NSInteger _hintToolTipTag;
     NSTrackingArea *_hintArea;
@@ -32,7 +31,7 @@ static const CGFloat MASButtonFontSize = 11;
 
 + (Class)shortcutCellClass
 {
-    return [MASShortcutViewButtonCell class];
+    return [NSButtonCell class];
 }
 
 - (id)initWithFrame:(CGRect)frameRect
@@ -56,7 +55,7 @@ static const CGFloat MASButtonFontSize = 11;
 - (void)commonInit
 {
     _shortcutCell = [[[self.class shortcutCellClass] alloc] init];
-    _shortcutCell.buttonType = NSButtonTypePushOnPushOff;
+    _shortcutCell.buttonType = NSPushOnPushOffButton;
     _shortcutCell.font = [[NSFontManager sharedFontManager] convertFont:_shortcutCell.font toSize:MASButtonFontSize];
     _shortcutValidator = [MASShortcutValidator sharedValidator];
     _enabled = YES;
@@ -98,25 +97,21 @@ static const CGFloat MASButtonFontSize = 11;
 {
     switch (_style) {
         case MASShortcutViewStyleDefault: {
-            _shortcutCell.bezelStyle = NSBezelStyleRoundRect;
+            _shortcutCell.bezelStyle = NSRoundRectBezelStyle;
             break;
         }
         case MASShortcutViewStyleTexturedRect: {
-            _shortcutCell.bezelStyle = NSBezelStyleTexturedRounded;
+            _shortcutCell.bezelStyle = NSTexturedRoundedBezelStyle;
             break;
         }
         case MASShortcutViewStyleRounded: {
-            _shortcutCell.bezelStyle = NSBezelStyleRounded;
+            _shortcutCell.bezelStyle = NSRoundedBezelStyle;
             break;
         }
         case MASShortcutViewStyleFlat: {
             self.wantsLayer = YES;
             _shortcutCell.backgroundColor = [NSColor clearColor];
             _shortcutCell.bordered = NO;
-            break;
-        }
-        case MASShortcutViewStyleRegularSquare: {
-            _shortcutCell.bezelStyle = NSBezelStyleRegularSquare;
             break;
         }
     }
@@ -206,21 +201,24 @@ static const CGFloat MASButtonFontSize = 11;
     _shortcutCell.state = state;
     _shortcutCell.enabled = self.enabled;
 
-    CGFloat yOffset;
-
     switch (_style) {
-        case MASShortcutViewStyleTexturedRect:
-        case MASShortcutViewStyleRounded:
-        case MASShortcutViewStyleRegularSquare: {
-            yOffset = 1.0;
+        case MASShortcutViewStyleDefault: {
+            [_shortcutCell drawWithFrame:frame inView:self];
             break;
         }
-        default:
-            yOffset = 0.0;
+        case MASShortcutViewStyleTexturedRect: {
+            [_shortcutCell drawWithFrame:CGRectOffset(frame, 0.0, 1.0) inView:self];
             break;
+        }
+        case MASShortcutViewStyleRounded: {
+            [_shortcutCell drawWithFrame:CGRectOffset(frame, 0.0, 1.0) inView:self];
+            break;
+        }
+        case MASShortcutViewStyleFlat: {
+            [_shortcutCell drawWithFrame:frame inView:self];
+            break;
+        }
     }
-
-    [_shortcutCell drawWithFrame:CGRectOffset(frame, 0.0, yOffset) inView:self];
 }
 
 - (void)drawRect:(CGRect)dirtyRect
@@ -233,7 +231,7 @@ static const CGFloat MASButtonFontSize = 11;
             buttonTitle = NSStringFromMASKeyCode(kMASShortcutGlyphClear);
         }
         if (buttonTitle != nil) {
-            [self drawInRect:self.bounds withTitle:buttonTitle alignment:NSTextAlignmentRight state:NSControlStateValueOff];
+            [self drawInRect:self.bounds withTitle:buttonTitle alignment:NSTextAlignmentRight state:NSOffState];
         }
         CGRect shortcutRect;
         [self getShortcutRect:&shortcutRect hintRect:NULL];
@@ -244,12 +242,12 @@ static const CGFloat MASButtonFontSize = 11;
                                  ? self.shortcutPlaceholder
                                  : MASLocalizedString(@"Type New Shortcut", @"Non-empty shortcut button in recording state")))
                            : _shortcutValue ? _shortcutValue.description : @"");
-        [self drawInRect:shortcutRect withTitle:title alignment:NSTextAlignmentCenter state:self.isRecording ? NSControlStateValueOn : NSControlStateValueOff];
+        [self drawInRect:shortcutRect withTitle:title alignment:NSTextAlignmentCenter state:self.isRecording ? NSOnState : NSOffState];
     }
     else {
         if (self.recording)
         {
-            [self drawInRect:self.bounds withTitle:NSStringFromMASKeyCode(kMASShortcutGlyphEscape) alignment:NSTextAlignmentRight state:NSControlStateValueOff];
+        [self drawInRect:self.bounds withTitle:NSStringFromMASKeyCode(kMASShortcutGlyphEscape) alignment:NSTextAlignmentRight state:NSOffState];
             
             CGRect shortcutRect;
             [self getShortcutRect:&shortcutRect hintRect:NULL];
@@ -258,12 +256,12 @@ static const CGFloat MASButtonFontSize = 11;
                                : (self.shortcutPlaceholder.length > 0
                                   ? self.shortcutPlaceholder
                                   : MASLocalizedString(@"Type Shortcut", @"Empty shortcut button in recording state")));
-            [self drawInRect:shortcutRect withTitle:title alignment:NSTextAlignmentCenter state:NSControlStateValueOn];
+        [self drawInRect:shortcutRect withTitle:title alignment:NSTextAlignmentCenter state:NSOnState];
         }
         else
         {
             [self drawInRect:self.bounds withTitle:MASLocalizedString(@"Record Shortcut", @"Empty shortcut button in normal state")
-                   alignment:NSTextAlignmentCenter state:NSControlStateValueOff];
+                   alignment:NSTextAlignmentCenter state:NSOffState];
         }
     }
 }
@@ -278,7 +276,7 @@ static const CGFloat MASButtonFontSize = 11;
     // calculate the intrinsic size without refactoring the code.  That would give better results,
     // however.
 
-    // 120 is an arbitrary number that seems to be wide enough for English localization.  This
+    // 120 is an arbitray number that seems to be wide enough for English localization.  This
     // may need to be adjusted for other locales/languages.
 
     // NOTE:  Simply returning cellSize results in a display that is sometimes correct
@@ -580,11 +578,6 @@ void *kUserDataHint = &kUserDataHint;
 }
 
 #pragma mark - Accessibility
-
-- (BOOL)isAccessibilityElement
-{
-    return YES;
-}
 
 - (NSString *)accessibilityHelp
 {

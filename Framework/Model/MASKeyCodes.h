@@ -1,5 +1,6 @@
 #import <Carbon/Carbon.h>
 #import <AppKit/AppKit.h>
+#import "MASKeyMasks.h"
 
 // These glyphs are missed in Carbon.h
 typedef NS_ENUM(unsigned short, kMASShortcutGlyph) {
@@ -23,15 +24,6 @@ typedef NS_ENUM(unsigned short, kMASShortcutGlyph) {
     kMASShortcutGlyphSoutheastArrow = 0x2198,
 };
 
-// The missing function key definitions for `NS*FunctionKey`s
-typedef NS_ENUM(unsigned short, kMASShortcutFuctionKey) {
-    kMASShortcutEscapeFunctionKey = 0x001B,
-    kMASShortcutDeleteFunctionKey = 0x0008,
-    kMASShortcutSpaceFunctionKey = 0x0020,
-    kMASShortcutReturnFunctionKey = 0x000D,
-    kMASShortcutTabFunctionKey = 0x0009,
-};
-
 NS_INLINE NSString* NSStringFromMASKeyCode(unsigned short ch)
 {
     return [NSString stringWithFormat:@"%C", ch];
@@ -40,13 +32,6 @@ NS_INLINE NSString* NSStringFromMASKeyCode(unsigned short ch)
 NS_INLINE NSUInteger MASPickCocoaModifiers(NSUInteger flags)
 {
     return (flags & (NSEventModifierFlagControl | NSEventModifierFlagShift | NSEventModifierFlagOption | NSEventModifierFlagCommand));
-}
-
-// Used in `-[MASShortcutValidator isShortcut:alreadyTakenInMenu:explanation:]`.
-// This prevents incorrectly detecting an overlap with any shortcuts using the `fn` key.
-NS_INLINE NSUInteger MASPickModifiersIncludingFn(NSUInteger flags)
-{
-    return (flags & (NSEventModifierFlagControl | NSEventModifierFlagShift | NSEventModifierFlagOption | NSEventModifierFlagCommand | NSEventModifierFlagFunction));
 }
 
 NS_INLINE UInt32 MASCarbonModifiersFromCocoaModifiers(NSUInteger cocoaFlags)
